@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earphone BOM Manager</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef08a;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #f1f5f9;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background: #f1f5f9;
+        }
+
+        th .sort-icon {
+            margin-left: 5px;
+            opacity: 0.5;
+        }
+
+        th.sort-asc .sort-icon::after {
+            content: '↑';
+            opacity: 1;
+        }
+
+        th.sort-desc .sort-icon::after {
+            content: '↓';
+            opacity: 1;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        tr.completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .qty-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .qty-value {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .checkbox-cell {
+            width: 40px;
+        }
+
+        .checkbox-cell input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .sync-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .sync-panel h3 {
+            margin-bottom: 15px;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+
+        .status-dot.connected {
+            background: var(--success);
+        }
+
+        .peer-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .peer-item {
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: var(--radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-display {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: var(--radius);
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: var(--text);
+            color: white;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .highlight {
+            background: var(--highlight);
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+            }
+
+            th, td {
+                padding: 8px 12px;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="app-container">
+            <header>
+                <h1>🎧 Earphone BOM Manager</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" @click="exportCSV">📥 导出 CSV</button>
+                    <button class="btn btn-success" @click="copyLinks">🔗 复制卖家链接</button>
+                    <button class="btn" @click="loadFromMarkdown" v-if="!loaded">📄 加载 Markdown</button>
+                </div>
+            </header>
+
+            <div class="stats" v-if="loaded">
+                <div class="stat-card">
+                    <div class="stat-value">{{ totalItems }}</div>
+                    <div class="stat-label">总项目数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ completedItems }}</div>
+                    <div class="stat-label">已完成</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ progressPercent }}%</div>
+                    <div class="stat-label">进度</div>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    v-model="searchQuery" 
+                    placeholder="搜索 BOM 项目..." 
+                    @input="onSearch"
+                >
+            </div>
+
+            <div class="tabs">
+                <button 
+                    class="tab-btn" 
+                    :class="{ active: activeTab === 'bom' }"
+                    @click="activeTab = 'bom'"
+                >
+                    BOM 清单
+                </button>
+                <button 
+                    class="tab-btn" 
+                    :class="{ active: activeTab === 'tools' }"
+                    @click="activeTab = 'tools'"
+                >
+                    工具清单
+                </button>
+            </div>
+
+            <div class="table-container" v-if="loaded">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="checkbox-cell">✓</th>
+                            <th 
+                                v-for="col in currentColumns" 
+                                :key="col.key"
+                                :class="getSortClass(col.key)"
+                                @click="sortBy(col.key)"
+                            >
+                                {{ col.label }}
+                                <span class="sort-icon"></span>
+                            </th>
+                            <th>数量</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr 
+                            v-for="item in filteredAndSortedItems" 
+                            :key="item.id"
+                            :class="{ completed: item.completed }"
+                        >
+                            <td class="checkbox-cell">
+                                <input 
+                                    type="checkbox" 
+                                    v-model="item.completed"
+                                    @change="saveState"
+                                >
+                            </td>
+                            <td v-for="col in currentColumns" :key="col.key">
+                                <span v-html="highlightText(getValue(item, col.key))"></span>
+                            </td>
+                            <td>
+                                <div class="quantity-control">
+                                    <button class="qty-btn" @click="decrement(item)">-</button>
+                                    <span class="qty-value">{{ item.quantity }}</span>
+                                    <button class="qty-btn" @click="increment(item)">+</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="loading" v-if="!loaded">
+                <div class="spinner"></div>
+            </div>
+
+            <div class="sync-panel">
+                <h3>🔄 多设备同步 (WebRTC)</h3>
+                <div class="sync-status">
+                    <div class="status-dot" :class="{ connected: peers.length > 0 }"></div>
+                    <span>{{ syncStatusText }}</span>
+                </div>
+
+                <div v-if="!syncInitialized">
+                    <button class="btn btn-primary" @click="initSync">初始化同步</button>
+                </div>
+
+                <div v-else>
+                    <div>
+                        <strong>我的连接码:</strong>
+                        <div class="code-display">{{ myCode }}</div>
+                        <button class="btn btn-primary" @click="copyCode">复制连接码</button>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <strong>连接其他设备:</strong>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <input 
+                                type="text" 
+                                v-model="peerCode" 
+                                placeholder="粘贴其他设备的连接码"
+                                style="flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius);"
+                            >
+                            <button class="btn btn-success" @click="connectToPeer">连接</button>
+                        </div>
+                    </div>
+
+                    <div class="peer-list" v-if="peers.length > 0">
+                        <div class="peer-item" v-for="peer in peers" :key="peer.id">
+                            <span>设备 {{ peer.id.slice(0, 8) }}</span>
+                            <span style="color: var(--success);">已连接</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast" v-if="toast.show">
+            {{ toast.message }}
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, watch } = Vue;
+
+        // IndexedDB 封装
+        const DB_NAME = 'EarphoneBOMDB';
+        const DB_VERSION = 1;
+        const BOM_STORE = 'bom';
+        const STATE_STORE = 'state';
+        const TOOLS_STORE = 'tools';
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(BOM_STORE)) {
+                        db.createObjectStore(BOM_STORE, { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains(STATE_STORE)) {
+                        db.createObjectStore(STATE_STORE, { keyPath: 'key' });
+                    }
+                    if (!db.objectStoreNames.contains(TOOLS_STORE)) {
+                        db.createObjectStore(TOOLS_STORE, { keyPath: 'id' });
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function dbPut(storeName, data) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const request = store.put(data);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function dbGetAll(storeName) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readonly');
+                const store = tx.objectStore(storeName);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function dbClear(storeName) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const request = store.clear();
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Markdown 解析器
+        function parseMarkdownTables(markdown) {
+            const tables = [];
+            const lines = markdown.split('\n');
+            let currentTable = null;
+            let headers = [];
+            let inTable = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (line.startsWith('|') && line.endsWith('|')) {
+                    const cells = line.split('|').slice(1, -1).map(c => c.trim());
+                    
+                    if (!inTable) {
+                        headers = cells;
+                        inTable = true;
+                        currentTable = { headers: [], rows: [] };
+                    } else if (cells.every(c => /^[-:]+$/.test(c))) {
+                        currentTable.headers = headers;
+                    } else if (currentTable) {
+                        const row = {};
+                        headers.forEach((h, idx) => {
+                            row[h] = cells[idx] || '';
+                        });
+                        currentTable.rows.push(row);
+                    }
+                } else {
+                    if (currentTable && currentTable.rows.length > 0) {
+                        tables.push(currentTable);
+                    }
+                    currentTable = null;
+                    inTable = false;
+                }
+            }
+
+            if (currentTable && currentTable.rows.length > 0) {
+                tables.push(currentTable);
+            }
+
+            return tables;
+        }
+
+        // 内置 Markdown 数据（离线备用）
+        const BUILT_IN_MARKDOWN = `# earphone
+
+## BOM
+
+|序号|名称|型号|数量|参考链接|
+|--|--|--|--:|--|
+|1|换能器|RAB-32257-P183 | 2|https://item.taobao.com/item.htm?id=545045012555 |
+|2|外壳|304不锈钢管, 4.5mmx0.4mmx14mm | 2|https://item.taobao.com/item.htm?id=45464205547
+|3|低温热固胶|永宽化学KE-3827|1|https://item.taobao.com/item.htm?id=563760263044 |
+|4|焊点保护|透明热缩管1.5mmx4mm|2|
+|5|左侧色标|蓝色热缩管3mmx10mm|1|
+|6|右侧色标|红色热缩管3mmx10mm|1|
+|7|外壳护套|黑色四倍收缩加厚带胶热缩管 6mmx20mm|2|
+|8|耳机线|带麦|1|https://item.taobao.com/item.htm?id=529176391354 |
+|9|耳机套|comply audiopro smartcore 1对 |1|
+
+## 工具
+
+|序号|名称|型号|用途|参考链接|
+|--|--|--|--|--|
+|1|风枪焊台|不指定|焊接和热风|
+|2|斜口钳|不指定|剪线|https://detail.tmall.com/item.htm?id=574785632021
+|3|注射器|1ml|注胶|
+|4|鼠尾管||注胶|https://item.taobao.com/item.htm?id=39398324531
+|5|环割刀||外壳护套横向开剥|https://detail.tmall.com/item.htm?id=575121437896
+|6|手术刀||外壳护套纵向开剥|
+|7|台钳||固定|`;
+
+        // WebRTC 同步
+        class WebRTCSync {
+            constructor(onStateUpdate) {
+                this.onStateUpdate = onStateUpdate;
+                this.peers = new Map();
+                this.myId = crypto.randomUUID();
+                this.pc = null;
+                this.dataChannel = null;
+            }
+
+            async init() {
+                this.pc = new RTCPeerConnection({
+                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                });
+
+                this.dataChannel = this.pc.createDataChannel('sync', {
+                    ordered: true
+                });
+                this.setupDataChannel(this.dataChannel);
+
+                this.pc.ondatachannel = (e) => {
+                    this.setupDataChannel(e.channel);
+                };
+
+                this.pc.onicecandidate = (e) => {
+                    if (e.candidate === null) {
+                        const offer = btoa(JSON.stringify(this.pc.localDescription));
+                        this.myCode = offer;
+                    }
+                };
+
+                const offer = await this.pc.createOffer();
+                await this.pc.setLocalDescription(offer);
+
+                return this.myId;
+            }
+
+            setupDataChannel(channel) {
+                channel.onmessage = (e) => {
+                    try {
+                        const data = JSON.parse(e.data);
+                        if (data.type === 'state') {
+                            this.onStateUpdate(data.payload);
+                        }
+                    } catch (err) {
+                        console.error('Sync error:', err);
+                    }
+                };
+
+                channel.onopen = () => {
+                    this.broadcastState();
+                };
+            }
+
+            async connectToPeer(answerCode) {
+                try {
+                    const answer = JSON.parse(atob(answerCode));
+                    await this.pc.setRemoteDescription(answer);
+                } catch (err) {
+                    console.error('Connection error:', err);
+                    throw err;
+                }
+            }
+
+            broadcastState() {
+                if (this.dataChannel && this.dataChannel.readyState === 'open') {
+                    this.onStateUpdate && this.onStateUpdate();
+                }
+            }
+
+            sendState(state) {
+                if (this.dataChannel && this.dataChannel.readyState === 'open') {
+                    this.dataChannel.send(JSON.stringify({
+                        type: 'state',
+                        payload: state
+                    }));
+                }
+            }
+
+            getMyCode() {
+                return this.myCode || '';
+            }
+        }
+
+        // Vue 应用
+        createApp({
+            setup() {
+                const bomItems = ref([]);
+                const toolItems = ref([]);
+                const activeTab = ref('bom');
+                const searchQuery = ref('');
+                const sortColumn = ref('序号');
+                const sortDirection = ref('asc');
+                const loaded = ref(false);
+                const toast = ref({ show: false, message: '' });
+                const syncInitialized = ref(false);
+                const myCode = ref('');
+                const peerCode = ref('');
+                const peers = ref([]);
+                let sync = null;
+                let searchTimeout = null;
+
+                const bomColumns = [
+                    { key: '序号', label: '序号' },
+                    { key: '名称', label: '名称' },
+                    { key: '型号', label: '型号' },
+                    { key: '参考链接', label: '参考链接' }
+                ];
+
+                const toolColumns = [
+                    { key: '序号', label: '序号' },
+                    { key: '名称', label: '名称' },
+                    { key: '型号', label: '型号' },
+                    { key: '用途', label: '用途' },
+                    { key: '参考链接', label: '参考链接' }
+                ];
+
+                const currentColumns = computed(() => {
+                    return activeTab.value === 'bom' ? bomColumns : toolColumns;
+                });
+
+                const currentItems = computed(() => {
+                    return activeTab.value === 'bom' ? bomItems.value : toolItems.value;
+                });
+
+                const filteredAndSortedItems = computed(() => {
+                    let items = [...currentItems.value];
+
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        items = items.filter(item => {
+                            return Object.values(item).some(val => 
+                                String(val).toLowerCase().includes(query)
+                            );
+                        });
+                    }
+
+                    items.sort((a, b) => {
+                        let aVal = a[sortColumn.value] || '';
+                        let bVal = b[sortColumn.value] || '';
+
+                        if (sortColumn.value === '数量') {
+                            aVal = Number(aVal) || 0;
+                            bVal = Number(bVal) || 0;
+                        }
+
+                        if (aVal < bVal) return sortDirection.value === 'asc' ? -1 : 1;
+                        if (aVal > bVal) return sortDirection.value === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+
+                    return items;
+                });
+
+                const totalItems = computed(() => currentItems.value.length);
+                const completedItems = computed(() => 
+                    currentItems.value.filter(i => i.completed).length
+                );
+                const progressPercent = computed(() => {
+                    if (totalItems.value === 0) return 0;
+                    return Math.round((completedItems.value / totalItems.value) * 100);
+                });
+
+                const syncStatusText = computed(() => {
+                    if (!syncInitialized.value) return '未初始化';
+                    if (peers.value.length === 0) return '等待连接';
+                    return `已连接 ${peers.value.length} 个设备`;
+                });
+
+                function getSortClass(col) {
+                    if (sortColumn.value !== col) return '';
+                    return sortDirection.value === 'asc' ? 'sort-asc' : 'sort-desc';
+                }
+
+                function sortBy(col) {
+                    if (sortColumn.value === col) {
+                        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortColumn.value = col;
+                        sortDirection.value = 'asc';
+                    }
+                }
+
+                function getValue(item, key) {
+                    return item[key] || '';
+                }
+
+                function highlightText(text) {
+                    if (!searchQuery.value || !text) return text;
+                    const regex = new RegExp(`(${searchQuery.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    return String(text).replace(regex, '<span class="highlight">$1</span>');
+                }
+
+                function increment(item) {
+                    item.quantity = (item.quantity || 1) + 1;
+                    saveState();
+                }
+
+                function decrement(item) {
+                    if (item.quantity > 1) {
+                        item.quantity--;
+                        saveState();
+                    }
+                }
+
+                async function saveState() {
+                    const state = {
+                        key: 'app_state',
+                        bom: bomItems.value,
+                        tools: toolItems.value,
+                        timestamp: Date.now()
+                    };
+                    await dbPut(STATE_STORE, state);
+                    
+                    if (sync) {
+                        sync.sendState(state);
+                    }
+                }
+
+                async function loadState() {
+                    try {
+                        const states = await dbGetAll(STATE_STORE);
+                        if (states.length > 0) {
+                            const state = states[0];
+                            if (state.bom) bomItems.value = state.bom;
+                            if (state.tools) toolItems.value = state.tools;
+                            return true;
+                        }
+                    } catch (e) {
+                        console.error('Load state error:', e);
+                    }
+                    return false;
+                }
+
+                function showToast(message) {
+                    toast.value = { show: true, message };
+                    setTimeout(() => {
+                        toast.value.show = false;
+                    }, 3000);
+                }
+
+                async function loadFromMarkdown() {
+                    try {
+                        let markdown = BUILT_IN_MARKDOWN;
+                        
+                        try {
+                            const response = await fetch('README.md');
+                            if (response.ok) {
+                                markdown = await response.text();
+                            }
+                        } catch (e) {
+                            console.log('Using built-in markdown');
+                        }
+
+                        const tables = parseMarkdownTables(markdown);
+                        
+                        if (tables.length >= 2) {
+                            const bomTable = tables[0];
+                            const toolTable = tables[1];
+
+                            bomItems.value = bomTable.rows.map((row, idx) => ({
+                                id: `bom_${idx}`,
+                                序号: row['序号'] || idx + 1,
+                                名称: row['名称'] || '',
+                                型号: row['型号'] || '',
+                                数量: parseInt(row['数量']) || 1,
+                                参考链接: row['参考链接'] || '',
+                                completed: false
+                            }));
+
+                            toolItems.value = toolTable.rows.map((row, idx) => ({
+                                id: `tool_${idx}`,
+                                序号: row['序号'] || idx + 1,
+                                名称: row['名称'] || '',
+                                型号: row['型号'] || '',
+                                用途: row['用途'] || '',
+                                参考链接: row['参考链接'] || '',
+                                quantity: 1,
+                                completed: false
+                            }));
+
+                            await dbClear(BOM_STORE);
+                            await dbClear(TOOLS_STORE);
+                            
+                            for (const item of bomItems.value) {
+                                await dbPut(BOM_STORE, item);
+                            }
+                            for (const item of toolItems.value) {
+                                await dbPut(TOOLS_STORE, item);
+                            }
+
+                            await saveState();
+                            loaded.value = true;
+                            showToast('数据加载成功');
+                        }
+                    } catch (e) {
+                        console.error('Load error:', e);
+                        showToast('加载失败: ' + e.message);
+                    }
+                }
+
+                function exportCSV() {
+                    const items = currentItems.value;
+                    const columns = currentColumns.value.map(c => c.key);
+                    columns.push('数量', '完成状态');
+
+                    let csv = columns.join(',') + '\n';
+                    
+                    items.forEach(item => {
+                        const row = columns.map(col => {
+                            let val = col === '数量' ? item.quantity : 
+                                     col === '完成状态' ? (item.completed ? '是' : '否') :
+                                     item[col] || '';
+                            return `"${String(val).replace(/"/g, '""')}"`;
+                        });
+                        csv += row.join(',') + '\n';
+                    });
+
+                    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${activeTab.value}_export_${new Date().toISOString().slice(0,10)}.csv`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    
+                    showToast('CSV 导出成功');
+                }
+
+                function copyLinks() {
+                    const items = currentItems.value;
+                    const links = items
+                        .filter(item => item['参考链接'])
+                        .map(item => `${item['名称']}: ${item['参考链接']}`)
+                        .join('\n');
+
+                    navigator.clipboard.writeText(links).then(() => {
+                        showToast('链接已复制到剪贴板');
+                    }).catch(() => {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = links;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        showToast('链接已复制到剪贴板');
+                    });
+                }
+
+                function onSearch() {
+                    if (searchTimeout) clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                    }, 50);
+                }
+
+                async function initSync() {
+                    try {
+                        sync = new WebRTCSync(async () => {
+                            await saveState();
+                        });
+                        
+                        await sync.init();
+                        syncInitialized.value = true;
+                        myCode.value = sync.getMyCode();
+                        showToast('同步已初始化');
+                    } catch (e) {
+                        showToast('同步初始化失败: ' + e.message);
+                    }
+                }
+
+                async function connectToPeer() {
+                    if (!peerCode.value || !sync) return;
+                    
+                    try {
+                        await sync.connectToPeer(peerCode.value);
+                        peers.value.push({ id: crypto.randomUUID() });
+                        showToast('连接成功');
+                        peerCode.value = '';
+                    } catch (e) {
+                        showToast('连接失败: ' + e.message);
+                    }
+                }
+
+                function copyCode() {
+                    navigator.clipboard.writeText(myCode.value).then(() => {
+                        showToast('连接码已复制');
+                    });
+                }
+
+                onMounted(async () => {
+                    const hasState = await loadState();
+                    if (hasState && bomItems.value.length > 0) {
+                        loaded.value = true;
+                    } else {
+                        await loadFromMarkdown();
+                    }
+                });
+
+                return {
+                    bomItems,
+                    toolItems,
+                    activeTab,
+                    searchQuery,
+                    sortColumn,
+                    sortDirection,
+                    loaded,
+                    toast,
+                    syncInitialized,
+                    myCode,
+                    peerCode,
+                    peers,
+                    currentColumns,
+                    currentItems,
+                    filteredAndSortedItems,
+                    totalItems,
+                    completedItems,
+                    progressPercent,
+                    syncStatusText,
+                    getSortClass,
+                    sortBy,
+                    getValue,
+                    highlightText,
+                    increment,
+                    decrement,
+                    saveState,
+                    loadFromMarkdown,
+                    exportCSV,
+                    copyLinks,
+                    onSearch,
+                    initSync,
+                    connectToPeer,
+                    copyCode
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
