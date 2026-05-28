@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earphone BOM 管理器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #1a1a2e;
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-group label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .control-group input, .control-group select {
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .control-group input:focus, .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .content {
+            display: grid;
+            gap: 20px;
+        }
+
+        .table-container {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            opacity: 0.9;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        tr.completed {
+            opacity: 0.6;
+        }
+
+        .highlight {
+            background: yellow;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border-radius: 50%;
+            background: #f0f0f0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .qty-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .qty-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .sync-section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .sync-section h2 {
+            color: #1a1a2e;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .status {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 12px;
+        }
+
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.offline {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="header">
+                <h1>🎧 Earphone BOM 管理器</h1>
+                
+                <div class="tabs">
+                    <button class="tab" :class="{ active: activeTab === 'bom' }" @click="activeTab = 'bom'">BOM 清单</button>
+                    <button class="tab" :class="{ active: activeTab === 'tools' }" @click="activeTab = 'tools'">工具清单</button>
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <label>搜索</label>
+                        <input type="text" v-model="searchQuery" placeholder="搜索名称、型号...">
+                    </div>
+                    <div class="control-group">
+                        <label>排序方式</label>
+                        <select v-model="sortBy">
+                            <option value="id">序号</option>
+                            <option value="name">名称</option>
+                            <option value="model">型号</option>
+                            <option value="quantity">数量</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>排序方向</label>
+                        <select v-model="sortOrder">
+                            <option value="asc">升序</option>
+                            <option value="desc">降序</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn-primary" @click="exportCSV">导出为 CSV</button>
+                    <button class="btn-secondary" @click="copyLinks">复制所有链接</button>
+                    <button class="btn-secondary" @click="loadFromMarkdown">重新加载数据</button>
+                </div>
+
+                <div :class="['status', isOnline ? 'online' : 'offline']">
+                    {{ isOnline ? '🟢 在线' : '🟡 离线模式' }} - {{ isDBReady ? '✅ 数据库就绪' : '⏳ 数据库初始化中...' }}
+                </div>
+            </div>
+
+            <div class="sync-section">
+                <h2>🔄 WebRTC 同步</h2>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>房间 ID</label>
+                        <input type="text" v-model="roomId" placeholder="输入或生成房间 ID">
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="btn-primary" @click="generateRoomId">生成房间 ID</button>
+                    <button class="btn-secondary" @click="initSync">开始同步</button>
+                </div>
+                <div class="status" v-if="syncStatus">{{ syncStatus }}</div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th @click="toggleSort('id')">序号 ↕</th>
+                            <th @click="toggleSort('completed')">完成 ↕</th>
+                            <th @click="toggleSort('name')">名称 ↕</th>
+                            <th @click="toggleSort('model')">型号 ↕</th>
+                            <th v-if="activeTab === 'bom'" @click="toggleSort('quantity')">数量 ↕</th>
+                            <th v-if="activeTab === 'tools'">用途</th>
+                            <th>参考链接</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in sortedItems" :key="item.id" :class="{ completed: item.completed }">
+                            <td>{{ item.id }}</td>
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" v-model="item.completed" @change="saveToDB">
+                                </div>
+                            </td>
+                            <td v-html="highlightText(item.name)"></td>
+                            <td v-html="highlightText(item.model)"></td>
+                            <td v-if="activeTab === 'bom'">
+                                <div class="qty-controls">
+                                    <button class="qty-btn" @click="updateQuantity(item, -1)">-</button>
+                                    <span class="qty-value">{{ item.quantity }}</span>
+                                    <button class="qty-btn" @click="updateQuantity(item, 1)">+</button>
+                                </div>
+                            </td>
+                            <td v-if="activeTab === 'tools'">{{ item.purpose }}</td>
+                            <td>
+                                <a v-if="item.link" :href="item.link" target="_blank" rel="noopener">链接</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        const DB_NAME = 'EarphoneBOM';
+        const DB_VERSION = 1;
+        const STORE_BOM = 'bom';
+        const STORE_TOOLS = 'tools';
+
+        const README_CONTENT = `# earphone
+
+如果你只是希望寻找一个可信的卖家购买钢管舞耳机，请参考我们的 [可信卖家名单](http://poledance.store). 
+
+## BOM
+
+|序号|名称|型号|数量|参考链接|
+|--|--|--|--:|--|
+|1|换能器|RAB-32257-P183 | 2|https://item.taobao.com/item.htm?id=545045012555 |
+|2|外壳|304不锈钢管, 4.5mmx0.4mmx14mm | 2|https://item.taobao.com/item.htm?id=45464205547
+|3|低温热固胶|永宽化学KE-3827|1|https://item.taobao.com/item.htm?id=563760263044 |
+|4|焊点保护|透明热缩管1.5mmx4mm|2|
+|5|左侧色标|蓝色热缩管3mmx10mm|1|
+|6|右侧色标|红色热缩管3mmx10mm|1|
+|7|外壳护套|黑色四倍收缩加厚带胶热缩管 6mmx20mm|2|
+|8|耳机线|带麦|1|https://item.taobao.com/item.htm?id=529176391354 |
+|9|耳机套|comply audiopro smartcore 1对 |1|
+
+
+## 工具
+
+|序号|名称|型号|用途|参考链接|
+|--|--|--|--|--|
+|1|风枪焊台|不指定|焊接和热风|
+|2|斜口钳|不指定|剪线|https://detail.tmall.com/item.htm?id=574785632021
+|3|注射器|1ml|注胶|
+|4|鼠尾管||注胶|https://item.taobao.com/item.htm?id=39398324531
+|5|环割刀||外壳护套横向开剥|https://detail.tmall.com/item.htm?id=575121437896
+|6|手术刀||外壳护套纵向开剥|
+|7|台钳||固定|
+
+## 安装教程
+
+耳机制作1
+https://v.youku.com/v_show/id_XMzYxNjcwNDU0OA
+
+耳机制作2
+https://v.youku.com/v_show/id_XMzYxNjc5NDkyOA
+`;
+
+        function generateMockData() {
+            const mockBOM = [];
+            const mockTools = [];
+            
+            for (let i = 10; i <= 500; i++) {
+                mockBOM.push({
+                    id: i,
+                    name: \`模拟组件 \${i}\`,
+                    model: \`MODEL-\${String(i).padStart(4, '0')}\`,
+                    quantity: Math.floor(Math.random() * 10) + 1,
+                    link: i % 3 === 0 ? \`https://example.com/item\${i}\` : '',
+                    completed: Math.random() > 0.7
+                });
+                
+                if (i <= 500) {
+                    mockTools.push({
+                        id: i,
+                        name: \`模拟工具 \${i}\`,
+                        model: \`TOOL-\${String(i).padStart(4, '0')}\`,
+                        purpose: ['切割', '焊接', '测量', '固定'][Math.floor(Math.random() * 4)],
+                        link: i % 4 === 0 ? \`https://example.com/tool\${i}\` : '',
+                        completed: Math.random() > 0.8
+                    });
+                }
+            }
+            
+            return { mockBOM, mockTools };
+        }
+
+        function parseMarkdownTables(markdown) {
+            const lines = markdown.split('\\n');
+            const tables = { bom: [], tools: [] };
+            let currentTable = null;
+            let tableLines = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (line === '## BOM') {
+                    currentTable = 'bom';
+                    continue;
+                }
+                if (line === '## 工具') {
+                    currentTable = 'tools';
+                    continue;
+                }
+                if (line.startsWith('##') && currentTable) {
+                    currentTable = null;
+                }
+                
+                if (currentTable && line.startsWith('|') && !line.includes('|--|')) {
+                    const cells = line.split('|').map(c => c.trim()).filter(c => c !== '');
+                    if (cells.length >= 4 && !isNaN(parseInt(cells[0]))) {
+                        if (currentTable === 'bom' && cells.length >= 5) {
+                            tables.bom.push({
+                                id: parseInt(cells[0]),
+                                name: cells[1],
+                                model: cells[2],
+                                quantity: parseInt(cells[3]) || 1,
+                                link: cells[4] || '',
+                                completed: false
+                            });
+                        } else if (currentTable === 'tools' && cells.length >= 4) {
+                            tables.tools.push({
+                                id: parseInt(cells[0]),
+                                name: cells[1],
+                                model: cells[2],
+                                purpose: cells[3],
+                                link: cells[4] || '',
+                                completed: false
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return tables;
+        }
+
+        createApp({
+            setup() {
+                const activeTab = ref('bom');
+                const searchQuery = ref('');
+                const sortBy = ref('id');
+                const sortOrder = ref('asc');
+                const bomItems = ref([]);
+                const toolItems = ref([]);
+                const isOnline = ref(navigator.onLine);
+                const isDBReady = ref(false);
+                const roomId = ref('');
+                const syncStatus = ref('');
+                
+                let db = null;
+
+                function initDB() {
+                    return new Promise((resolve, reject) => {
+                        const request = indexedDB.open(DB_NAME, DB_VERSION);
+                        
+                        request.onerror = () => reject(request.error);
+                        request.onsuccess = () => {
+                            db = request.result;
+                            isDBReady.value = true;
+                            resolve(db);
+                        };
+                        
+                        request.onupgradeneeded = (event) => {
+                            const database = event.target.result;
+                            
+                            if (!database.objectStoreNames.contains(STORE_BOM)) {
+                                database.createObjectStore(STORE_BOM, { keyPath: 'id' });
+                            }
+                            if (!database.objectStoreNames.contains(STORE_TOOLS)) {
+                                database.createObjectStore(STORE_TOOLS, { keyPath: 'id' });
+                            }
+                        };
+                    });
+                }
+
+                async function saveToDB() {
+                    if (!db) return;
+                    
+                    const tx1 = db.transaction([STORE_BOM], 'readwrite');
+                    const store1 = tx1.objectStore(STORE_BOM);
+                    bomItems.value.forEach(item => store1.put(item));
+                    
+                    const tx2 = db.transaction([STORE_TOOLS], 'readwrite');
+                    const store2 = tx2.objectStore(STORE_TOOLS);
+                    toolItems.value.forEach(item => store2.put(item));
+                }
+
+                async function loadFromDB() {
+                    if (!db) return;
+                    
+                    const tx1 = db.transaction([STORE_BOM], 'readonly');
+                    const store1 = tx1.objectStore(STORE_BOM);
+                    const bomData = await new Promise((resolve) => {
+                        const request = store1.getAll();
+                        request.onsuccess = () => resolve(request.result);
+                    });
+                    
+                    const tx2 = db.transaction([STORE_TOOLS], 'readonly');
+                    const store2 = tx2.objectStore(STORE_TOOLS);
+                    const toolData = await new Promise((resolve) => {
+                        const request = store2.getAll();
+                        request.onsuccess = () => resolve(request.result);
+                    });
+                    
+                    if (bomData.length > 0) {
+                        bomItems.value = bomData;
+                    }
+                    if (toolData.length > 0) {
+                        toolItems.value = toolData;
+                    }
+                }
+
+                async function loadFromMarkdown() {
+                    const tables = parseMarkdownTables(README_CONTENT);
+                    const { mockBOM, mockTools } = generateMockData();
+                    
+                    bomItems.value = [...tables.bom, ...mockBOM];
+                    toolItems.value = [...tables.tools, ...mockTools];
+                    
+                    await saveToDB();
+                }
+
+                const currentItems = computed(() => {
+                    return activeTab.value === 'bom' ? bomItems.value : toolItems.value;
+                });
+
+                const sortedItems = computed(() => {
+                    let items = [...currentItems.value];
+                    
+                    if (searchQuery.value) {
+                        const query = searchQuery.value.toLowerCase();
+                        items = items.filter(item => 
+                            item.name.toLowerCase().includes(query) ||
+                            item.model.toLowerCase().includes(query)
+                        );
+                    }
+                    
+                    items.sort((a, b) => {
+                        let valA = a[sortBy.value];
+                        let valB = b[sortBy.value];
+                        
+                        if (typeof valA === 'string') {
+                            valA = valA.toLowerCase();
+                            valB = valB.toLowerCase();
+                        }
+                        
+                        if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1;
+                        if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+                    
+                    return items;
+                });
+
+                function highlightText(text) {
+                    if (!searchQuery.value) return text;
+                    const regex = new RegExp(\`(\${searchQuery.value.replace(/[.*+?^${}()|[\]\\\\\\\\]/g, '\\\\$&')})\`, 'gi');
+                    return text.replace(regex, '<span class="highlight">$1</span>');
+                }
+
+                function updateQuantity(item, delta) {
+                    item.quantity = Math.max(1, item.quantity + delta);
+                    saveToDB();
+                }
+
+                function toggleSort(field) {
+                    if (sortBy.value === field) {
+                        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortBy.value = field;
+                        sortOrder.value = 'asc';
+                    }
+                }
+
+                function exportCSV() {
+                    const items = sortedItems.value;
+                    let csv = '';
+                    
+                    if (activeTab.value === 'bom') {
+                        csv = '序号,名称,型号,数量,参考链接,完成\\n';
+                        items.forEach(item => {
+                            csv += \`\${item.id},"\${item.name}","\${item.model}",\${item.quantity},"\${item.link}",\${item.completed ? '是' : '否'}\\n\`;
+                        });
+                    } else {
+                        csv = '序号,名称,型号,用途,参考链接,完成\\n';
+                        items.forEach(item => {
+                            csv += \`\${item.id},"\${item.name}","\${item.model}","\${item.purpose}","\${item.link}",\${item.completed ? '是' : '否'}\\n\`;
+                        });
+                    }
+                    
+                    const blob = new Blob(['\\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = activeTab.value === 'bom' ? 'bom.csv' : 'tools.csv';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+
+                function copyLinks() {
+                    const links = sortedItems.value.filter(i => i.link).map(i => i.link).join('\\n');
+                    navigator.clipboard.writeText(links).then(() => {
+                        alert('链接已复制到剪贴板！');
+                    });
+                }
+
+                function generateRoomId() {
+                    roomId.value = Math.random().toString(36).substr(2, 8).toUpperCase();
+                }
+
+                function initSync() {
+                    syncStatus.value = 'WebRTC 同步功能需要信令服务器支持，本演示为简化版本。数据已通过 IndexedDB 本地存储，可以离线使用。';
+                }
+
+                onMounted(async () => {
+                    window.addEventListener('online', () => isOnline.value = true);
+                    window.addEventListener('offline', () => isOnline.value = false);
+                    
+                    await initDB();
+                    await loadFromDB();
+                    
+                    if (bomItems.value.length === 0) {
+                        await loadFromMarkdown();
+                    }
+                });
+
+                return {
+                    activeTab,
+                    searchQuery,
+                    sortBy,
+                    sortOrder,
+                    isOnline,
+                    isDBReady,
+                    roomId,
+                    syncStatus,
+                    sortedItems,
+                    highlightText,
+                    updateQuantity,
+                    toggleSort,
+                    exportCSV,
+                    copyLinks,
+                    loadFromMarkdown,
+                    generateRoomId,
+                    initSync
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
