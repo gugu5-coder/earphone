@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>钢管舞耳机 BOM 清单</title>
+  <style>
+    :root {
+      --primary: #4a90d9;
+      --primary-dark: #3a7bc8;
+      --success: #52c41a;
+      --danger: #ff4d4f;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #333;
+      --text-secondary: #666;
+      --border: #e8e8e8;
+      --shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .app { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .header {
+      background: var(--card);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .header h1 { font-size: 24px; margin-bottom: 8px; color: var(--primary); }
+    .header p { color: var(--text-secondary); font-size: 14px; }
+    .sync-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+    .sync-status.connected { background: #f6ffed; color: var(--success); }
+    .sync-status.disconnected { background: #fff1f0; color: var(--danger); }
+    .sync-status .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 16px 10px 40px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .search-box input:focus { outline: none; border-color: var(--primary); }
+    .search-box::before {
+      content: '🔍';
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #e63c3e; }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--border);
+      padding: 4px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 24px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-secondary);
+    }
+    .tab.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .table-container {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .table-header {
+      display: grid;
+      padding: 16px 20px;
+      background: #fafafa;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .table-header .sortable { cursor: pointer; user-select: none; }
+    .table-header .sortable:hover { color: var(--primary); }
+    .table-header .sort-icon { margin-left: 4px; opacity: 0.5; }
+    .table-header .sort-icon.active { opacity: 1; color: var(--primary); }
+    .bom-table .table-header { grid-template-columns: 50px 40px 1fr 150px 120px 80px; }
+    .tool-table .table-header { grid-template-columns: 50px 1fr 120px 120px 120px 80px; }
+    .table-row {
+      display: grid;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      transition: background 0.15s;
+    }
+    .table-row:last-child { border-bottom: none; }
+    .table-row:hover { background: #fafbfc; }
+    .table-row.completed { opacity: 0.6; }
+    .table-row.completed .row-name { text-decoration: line-through; }
+    .bom-table .table-row { grid-template-columns: 50px 40px 1fr 150px 120px 80px; }
+    .tool-table .table-row { grid-template-columns: 50px 1fr 120px 120px 120px 80px; }
+    .cell { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cell-index { color: var(--text-secondary); font-size: 12px; }
+    .row-name { font-weight: 500; }
+    .cell-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 12px;
+    }
+    .cell-link a:hover { text-decoration: underline; }
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      background: white;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      color: var(--text);
+    }
+    .qty-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .qty-btn:active { transform: scale(0.95); }
+    .qty-value { min-width: 24px; text-align: center; font-weight: 600; }
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      font-size: 14px;
+    }
+    .checkbox:hover { border-color: var(--success); }
+    .checkbox.checked { background: var(--success); border-color: var(--success); color: white; }
+    .highlight { background: #fff3cd; padding: 1px 2px; border-radius: 2px; }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--success);
+      transition: width 0.3s ease;
+    }
+    .stats {
+      display: flex;
+      gap: 24px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .stat-item span { font-weight: 600; color: var(--text); }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal h3 { margin-bottom: 16px; }
+    .modal p { margin-bottom: 12px; font-size: 14px; color: var(--text-secondary); }
+    .modal .code {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 12px;
+      word-break: break-all;
+      margin: 12px 0;
+    }
+    .modal .btn-group { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+    .peer-list { margin: 12px 0; }
+    .peer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .peer-item.online { border-left: 3px solid var(--success); }
+    .peer-item.offline { border-left: 3px solid var(--danger); }
+    @media (max-width: 768px) {
+      .app { padding: 12px; }
+      .header { padding: 16px; }
+      .bom-table .table-header,
+      .bom-table .table-row,
+      .tool-table .table-header,
+      .tool-table .table-row {
+        grid-template-columns: 40px 1fr 80px 70px;
+      }
+      .cell-link, .cell-model { display: none; }
+      .toolbar { flex-direction: column; }
+      .toolbar > * { width: 100%; }
+    }
+    .sync-panel {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .sync-panel h3 { margin-bottom: 12px; font-size: 16px; }
+    .sync-id {
+      font-family: monospace;
+      background: #f5f5f5;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      word-break: break-all;
+      margin: 8px 0;
+    }
+    .perf-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: #f6ffed;
+      color: var(--success);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="header">
+      <h1>🎧 钢管舞耳机 BOM 清单</h1>
+      <p>离线优先 · 多设备同步 · 实时协作</p>
+      <div class="sync-status" :class="peerConnected ? 'connected' : 'disconnected'">
+        <span class="dot"></span>
+        <span v-if="peerConnected">已连接 {{ connectedPeers }} 个设备</span>
+        <span v-else>离线模式 · 点击同步选项建立连接</span>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:12px; align-items:center;">
+        <span class="perf-badge">⚡ 性能优化</span>
+        <div class="stats">
+          <span class="stat-item">待采购: <span>{{ pendingCount }}</span></span>
+          <span class="stat-item">已完成: <span>{{ completedCount }}</span></span>
+        </div>
+        <div style="flex:1"></div>
+        <div class="progress-bar" style="width:120px">
+          <div class="progress-fill" :style="{width: progressPercent + '%'}"></div>
+        </div>
+        <span style="font-size:12px; color:var(--text-secondary)">{{ progressPercent }}%</span>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <input
+          v-model="searchQuery"
+          @input="handleSearch"
+          placeholder="搜索名称、型号..."
+          type="text"
+        >
+      </div>
+      <button class="btn btn-primary" @click="exportCSV">
+        📥 导出 CSV
+      </button>
+      <button class="btn btn-outline" @click="copySellerLinks">
+        🔗 复制卖家链接
+      </button>
+      <button class="btn btn-outline" @click="showSyncModal = true">
+        🔄 同步选项
+      </button>
+      <button class="btn btn-danger" @click="resetData">
+        🗑️ 重置
+      </button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab" :class="{active: activeTab === 'bom'}" @click="activeTab = 'bom'">
+        BOM 清单 ({{ bomItems.length }})
+      </button>
+      <button class="tab" :class="{active: activeTab === 'tools'}" @click="activeTab = 'tools'">
+        工具清单 ({{ toolItems.length }})
+      </button>
+    </div>
+
+    <div v-if="activeTab === 'bom'" class="table-container bom-table">
+      <div class="table-header">
+        <div class="cell">#</div>
+        <div class="cell"></div>
+        <div class="cell sortable" @click="sortBy('name')">
+          名称 <span class="sort-icon" :class="{active: sortKey === 'name'}">{{ sortIcon('name') }}</span>
+        </div>
+        <div class="cell sortable cell-model" @click="sortBy('model')">
+          型号 <span class="sort-icon" :class="{active: sortKey === 'model'}">{{ sortIcon('model') }}</span>
+        </div>
+        <div class="cell sortable" @click="sortBy('quantity')">
+          数量 <span class="sort-icon" :class="{active: sortKey === 'quantity'}">{{ sortIcon('quantity') }}</span>
+        </div>
+        <div class="cell sortable cell-link" @click="sortBy('link')">
+          参考链接 <span class="sort-icon" :class="{active: sortKey === 'link'}">{{ sortIcon('link') }}</span>
+        </div>
+        <div class="cell">操作</div>
+      </div>
+      <div v-if="filteredBOM.length === 0" class="empty-state">
+        <div class="icon">📋</div>
+        <p>暂无数据</p>
+      </div>
+      <div
+        v-for="(item, idx) in filteredBOM"
+        :key="item.id"
+        class="table-row"
+        :class="{completed: item.completed}"
+      >
+        <div class="cell cell-index">{{ idx + 1 }}</div>
+        <div class="cell checkbox-wrapper">
+          <div class="checkbox" :class="{checked: item.completed}" @click="toggleComplete(item)">
+            <span v-if="item.completed">✓</span>
+          </div>
+        </div>
+        <div class="cell row-name" v-html="highlightText(item.name)"></div>
+        <div class="cell cell-model" v-html="highlightText(item.model)"></div>
+        <div class="cell">
+          <div class="qty-control">
+            <button class="qty-btn" @click="decrementQty(item)">−</button>
+            <span class="qty-value">{{ item.quantity }}</span>
+            <button class="qty-btn" @click="incrementQty(item)">+</button>
+          </div>
+        </div>
+        <div class="cell cell-link">
+          <a v-if="item.link" :href="item.link" target="_blank" rel="noopener">查看</a>
+        </div>
+        <div class="cell"></div>
+      </div>
+    </div>
+
+    <div v-if="activeTab === 'tools'" class="table-container tool-table">
+      <div class="table-header">
+        <div class="cell">#</div>
+        <div class="cell sortable" @click="sortByTool('name')">
+          名称 <span class="sort-icon" :class="{active: sortKey === 'name'}">{{ sortIcon('name') }}</span>
+        </div>
+        <div class="cell sortable" @click="sortByTool('model')">
+          型号 <span class="sort-icon" :class="{active: sortKey === 'model'}">{{ sortIcon('model') }}</span>
+        </div>
+        <div class="cell">用途</div>
+        <div class="cell sortable" @click="sortByTool('link')">
+          参考链接 <span class="sort-icon" :class="{active: sortKey === 'link'}">{{ sortIcon('link') }}</span>
+        </div>
+        <div class="cell">操作</div>
+      </div>
+      <div v-if="filteredTools.length === 0" class="empty-state">
+        <div class="icon">🔧</div>
+        <p>暂无数据</p>
+      </div>
+      <div
+        v-for="(item, idx) in filteredTools"
+        :key="item.id"
+        class="table-row"
+        :class="{completed: item.completed}"
+      >
+        <div class="cell cell-index">{{ idx + 1 }}</div>
+        <div class="cell row-name" v-html="highlightText(item.name)"></div>
+        <div class="cell" v-html="highlightText(item.model)"></div>
+        <div class="cell">{{ item.usage }}</div>
+        <div class="cell cell-link">
+          <a v-if="item.link" :href="item.link" target="_blank" rel="noopener">查看</a>
+        </div>
+        <div class="cell checkbox-wrapper">
+          <div class="checkbox" :class="{checked: item.completed}" @click="toggleCompleteTool(item)">
+            <span v-if="item.completed">✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showSyncModal" class="modal-overlay" @click.self="showSyncModal = false">
+      <div class="modal">
+        <h3>🔄 同步选项</h3>
+        <p>通过 WebRTC 实现多设备实时同步</p>
+        <div style="margin: 16px 0;">
+          <label style="font-size:13px; color:var(--text-secondary);">你的设备 ID:</label>
+          <div class="sync-id">{{ deviceId }}</div>
+        </div>
+        <div class="peer-list">
+          <div v-for="peer in discoveredPeers" :key="peer.id" class="peer-item" :class="{online: peer.online, offline: !peer.online}">
+            <span>{{ peer.name || peer.id.slice(0, 8) }}</span>
+            <button class="btn btn-primary" style="padding:6px 12px; font-size:12px;" @click="connectToPeer(peer)" :disabled="peer.online">
+              {{ peer.online ? '已连接' : '连接' }}
+            </button>
+          </div>
+          <p v-if="discoveredPeers.length === 0" style="color:var(--text-secondary); font-size:13px;">
+            暂未发现其他设备，请确保其他设备已打开此页面
+          </p>
+        </div>
+        <p style="font-size:12px; color:var(--text-secondary); margin-top:12px;">
+          💡 提示: 在另一设备上打开此页面即可自动发现并同步
+        </p>
+        <div class="btn-group">
+          <button class="btn btn-outline" @click="showSyncModal = false">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="toast" class="toast">{{ toast }}</div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp, ref, computed, onMounted, watch } = Vue;
+
+    const DB_NAME = 'EarphoneBOM';
+    const DB_VERSION = 1;
+    const STORE_BOM = 'bom';
+    const STORE_TOOLS = 'tools';
+    const STORE_META = 'meta';
+
+    let db = null;
+    const peerConnections = new Map();
+    let localPeerId = null;
+    let signalingDataChannels = new Map();
+
+    const RTC_CONFIG = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
+    async function openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          db = request.result;
+          resolve(db);
+        };
+        request.onupgradeneeded = (e) => {
+          const database = e.target.result;
+          if (!database.objectStoreNames.contains(STORE_BOM)) {
+            database.createObjectStore(STORE_BOM, { keyPath: 'id' });
+          }
+          if (!database.objectStoreNames.contains(STORE_TOOLS)) {
+            database.createObjectStore(STORE_TOOLS, { keyPath: 'id' });
+          }
+          if (!database.objectStoreNames.contains(STORE_META)) {
+            database.createObjectStore(STORE_META, { keyPath: 'key' });
+          }
+        };
+      });
+    }
+
+    async function dbGet(store, key) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(store, 'readonly');
+        const request = tx.objectStore(store).get(key);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function dbPut(store, data) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(store, 'readwrite');
+        const request = tx.objectStore(store).put(data);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function dbGetAll(store) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(store, 'readonly');
+        const request = tx.objectStore(store).getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function dbClear(store) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(store, 'readwrite');
+        const request = tx.objectStore(store).clear();
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    }
+
+    function parseMarkdownTable(markdown) {
+      const lines = markdown.split('\n').filter(l => l.trim());
+      const tableLines = lines.filter(l => l.startsWith('|'));
+      if (tableLines.length < 2) return [];
+
+      const headers = tableLines[0].split('|').map(h => h.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1);
+      const dataLines = tableLines.slice(2);
+
+      return dataLines.map(line => {
+        const cells = line.split('|').map(c => c.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1);
+        const obj = {};
+        headers.forEach((h, i) => {
+          obj[h] = cells[i] || '';
+        });
+        return obj;
+      });
+    }
+
+    function parseBOMFromMarkdown(md) {
+      const bomMatch = md.match(/## BOM\n([\s\S]*?)(?=##|```|$)/);
+      if (!bomMatch) return [];
+      const tableData = parseMarkdownTable(bomMatch[1]);
+      return tableData.map((row, idx) => ({
+        id: generateId(),
+        seq: parseInt(row['序号']) || idx + 1,
+        name: row['名称'] || '',
+        model: row['型号'] || '',
+        quantity: parseInt(row['数量']) || 1,
+        link: row['参考链接'] || '',
+        completed: false
+      }));
+    }
+
+    function parseToolsFromMarkdown(md) {
+      const toolsMatch = md.match(/## 工具\n([\s\S]*?)(?=##|```|$)/);
+      if (!toolsMatch) return [];
+      const tableData = parseMarkdownTable(toolsMatch[1]);
+      return tableData.map((row, idx) => ({
+        id: generateId(),
+        seq: parseInt(row['序号']) || idx + 1,
+        name: row['名称'] || '',
+        model: row['型号'] || '',
+        usage: row['用途'] || '',
+        link: row['参考链接'] || '',
+        completed: false
+      }));
+    }
+
+    function broadcastToPeers(data) {
+      const message = JSON.stringify(data);
+      peerConnections.forEach((pc, peerId) => {
+        if (pc.dataChannel && pc.dataChannel.readyState === 'open') {
+          pc.dataChannel.send(message);
+        }
+      });
+    }
+
+    createApp({
+      setup() {
+        const bomItems = ref([]);
+        const toolItems = ref([]);
+        const activeTab = ref('bom');
+        const searchQuery = ref('');
+        const sortKey = ref('seq');
+        const sortOrder = ref('asc');
+        const toast = ref('');
+        const showSyncModal = ref(false);
+        const deviceId = ref('');
+        const discoveredPeers = ref([]);
+        const peerConnected = ref(false);
+        const connectedPeers = ref(0);
+
+        let searchTimeout = null;
+        let lastSearchTime = 0;
+
+        const filteredBOM = computed(() => {
+          const query = searchQuery.value.toLowerCase().trim();
+          let result = [...bomItems.value];
+
+          if (query) {
+            result = result.filter(item =>
+              item.name.toLowerCase().includes(query) ||
+              item.model.toLowerCase().includes(query)
+            );
+          }
+
+          result.sort((a, b) => {
+            let valA = a[sortKey.value] || '';
+            let valB = b[sortKey.value] || '';
+            if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
+            if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1;
+            if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1;
+            return 0;
+          });
+
+          return result;
+        });
+
+        const filteredTools = computed(() => {
+          const query = searchQuery.value.toLowerCase().trim();
+          let result = [...toolItems.value];
+
+          if (query) {
+            result = result.filter(item =>
+              item.name.toLowerCase().includes(query) ||
+              item.model.toLowerCase().includes(query)
+            );
+          }
+
+          result.sort((a, b) => {
+            let valA = a[sortKey.value] || '';
+            let valB = b[sortKey.value] || '';
+            if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
+            if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1;
+            if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1;
+            return 0;
+          });
+
+          return result;
+        });
+
+        const pendingCount = computed(() =>
+          bomItems.value.filter(i => !i.completed).length +
+          toolItems.value.filter(i => !i.completed).length
+        );
+
+        const completedCount = computed(() =>
+          bomItems.value.filter(i => i.completed).length +
+          toolItems.value.filter(i => i.completed).length
+        );
+
+        const progressPercent = computed(() => {
+          const total = bomItems.value.length + toolItems.value.length;
+          if (total === 0) return 0;
+          return Math.round((completedCount.value / total) * 100);
+        });
+
+        function showToast(msg) {
+          toast.value = msg;
+          setTimeout(() => toast.value = '', 3000);
+        }
+
+        function highlightText(text) {
+          if (!searchQuery.value || !text) return text;
+          const query = searchQuery.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`(${query})`, 'gi');
+          return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function handleSearch() {
+          const start = performance.now();
+          searchTimeout = setTimeout(() => {
+            const elapsed = performance.now() - start;
+            if (elapsed > 50) {
+              console.warn(`Search took ${elapsed.toFixed(2)}ms`);
+            }
+          }, 0);
+        }
+
+        function sortBy(key) {
+          if (sortKey.value === key) {
+            sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+          } else {
+            sortKey.value = key;
+            sortOrder.value = 'asc';
+          }
+        }
+
+        function sortByTool(key) {
+          sortBy(key);
+        }
+
+        function sortIcon(key) {
+          if (sortKey.value !== key) return '↕';
+          return sortOrder.value === 'asc' ? '↑' : '↓';
+        }
+
+        async function incrementQty(item) {
+          item.quantity++;
+          await dbPut(STORE_BOM, item);
+          broadcastToPeers({ type: 'update', item, store: STORE_BOM });
+        }
+
+        async function decrementQty(item) {
+          if (item.quantity > 0) {
+            item.quantity--;
+            await dbPut(STORE_BOM, item);
+            broadcastToPeers({ type: 'update', item, store: STORE_BOM });
+          }
+        }
+
+        async function toggleComplete(item) {
+          item.completed = !item.completed;
+          const store = activeTab.value === 'bom' ? STORE_BOM : STORE_TOOLS;
+          await dbPut(store, item);
+          broadcastToPeers({ type: 'update', item, store });
+        }
+
+        async function toggleCompleteTool(item) {
+          item.completed = !item.completed;
+          await dbPut(STORE_TOOLS, item);
+          broadcastToPeers({ type: 'update', item, store: STORE_TOOLS });
+        }
+
+        function exportCSV() {
+          const items = activeTab.value === 'bom' ? filteredBOM.value : filteredTools.value;
+          const isBOM = activeTab.value === 'bom';
+
+          const headers = isBOM
+            ? ['序号', '名称', '型号', '数量', '参考链接', '已完成']
+            : ['序号', '名称', '型号', '用途', '参考链接', '已完成'];
+
+          const rows = items.map(item => [
+            item.seq,
+            item.name,
+            item.model,
+            isBOM ? item.quantity : item.usage,
+            item.link,
+            item.completed ? '是' : '否'
+          ]);
+
+          const csvContent = [headers, ...rows]
+            .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+
+          const BOM = '\uFEFF';
+          const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${activeTab.value}_清单_${new Date().toISOString().slice(0, 10)}.csv`;
+          link.click();
+          URL.revokeObjectURL(url);
+          showToast('✅ CSV 已导出');
+        }
+
+        function copySellerLinks() {
+          const items = filteredBOM.value.filter(i => i.link);
+          const links = items.map(i => `${i.name}: ${i.link}`).join('\n');
+          navigator.clipboard.writeText(links).then(() => {
+            showToast(`✅ 已复制 ${items.length} 个链接`);
+          }).catch(() => {
+            showToast('❌ 复制失败，请手动复制');
+          });
+        }
+
+        async function resetData() {
+          if (!confirm('确定要重置所有数据吗？此操作不可撤销。')) return;
+          await dbClear(STORE_BOM);
+          await dbClear(STORE_TOOLS);
+          await loadInitialData();
+          showToast('🗑️ 数据已重置');
+        }
+
+        async function loadInitialData() {
+          const bomData = await dbGetAll(STORE_BOM);
+          const toolsData = await dbGetAll(STORE_TOOLS);
+
+          if (bomData.length === 0 && toolsData.length === 0) {
+            const bomResp = await fetch('README.md');
+            const bomMd = await bomResp.text();
+            const toolsResp = await fetch('docs/index.md');
+            const toolsMd = await toolsResp.text();
+
+            const bomParsed = parseBOMFromMarkdown(bomMd);
+            const toolsParsed = parseToolsFromMarkdown(bomMd);
+
+            for (const item of bomParsed) {
+              await dbPut(STORE_BOM, item);
+            }
+            for (const item of toolsParsed) {
+              await dbPut(STORE_TOOLS, item);
+            }
+
+            bomItems.value = bomParsed;
+            toolItems.value = toolsParsed;
+          } else {
+            bomItems.value = bomData.sort((a, b) => a.seq - b.seq);
+            toolItems.value = toolsData.sort((a, b) => a.seq - b.seq);
+          }
+        }
+
+        function initWebRTC() {
+          deviceId.value = generateId();
+          localPeerId = deviceId.value;
+
+          const isSecure = location.protocol === 'https:' || location.hostname === 'localhost';
+          if (!isSecure) {
+            console.warn('WebRTC requires HTTPS or localhost');
+            return;
+          }
+
+          discoveredPeers.value.push({
+            id: localPeerId,
+            name: '本机',
+            online: true
+          });
+
+          setupBroadcastChannel();
+        }
+
+        function setupBroadcastChannel() {
+          const bc = new BroadcastChannel('earphone-bom-sync');
+
+          bc.onmessage = async (e) => {
+            const data = e.data;
+
+            if (data.type === 'announce') {
+              const peerExists = discoveredPeers.value.find(p => p.id === data.peerId);
+              if (!peerExists && data.peerId !== localPeerId) {
+                discoveredPeers.value.push({
+                  id: data.peerId,
+                  name: data.name,
+                  online: true
+                });
+
+                broadcastToPeers({ type: 'announce', peerId: localPeerId, name: '本机' });
+                await createPeerConnection(data.peerId, true);
+              }
+            } else if (data.type === 'offer') {
+              await handleOffer(data);
+            } else if (data.type === 'answer') {
+              await handleAnswer(data);
+            } else if (data.type === 'ice-candidate') {
+              await handleIceCandidate(data);
+            } else if (data.type === 'sync-request') {
+              sendFullSync(data.fromPeerId);
+            } else if (data.type === 'sync-response') {
+              await handleSyncResponse(data);
+            }
+          };
+
+          setTimeout(() => {
+            bc.postMessage({ type: 'announce', peerId: localPeerId, name: '本机' });
+          }, 500);
+        }
+
+        async function createPeerConnection(peerId, initiator) {
+          const pc = new RTCPeerConnection(RTC_CONFIG);
+
+          const dataChannel = pc.createDataChannel('sync', { ordered: true });
+          setupDataChannel(dataChannel, peerId);
+
+          pc.dataChannel = dataChannel;
+          peerConnections.set(peerId, pc);
+
+          pc.onicecandidate = (e) => {
+            if (e.candidate) {
+              const bc = new BroadcastChannel('earphone-bom-sync');
+              bc.postMessage({
+                type: 'ice-candidate',
+                target: peerId,
+                candidate: e.candidate
+              });
+            }
+          };
+
+          if (initiator) {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            const bc = new BroadcastChannel('earphone-bom-sync');
+            bc.postMessage({ type: 'offer', target: peerId, offer });
+          }
+
+          return pc;
+        }
+
+        function setupDataChannel(dc, peerId) {
+          dc.onopen = () => {
+            peerConnected.value = true;
+            connectedPeers.value = peerConnections.size;
+
+            const peer = discoveredPeers.value.find(p => p.id === peerId);
+            if (peer) peer.online = true;
+
+            sendFullSync(peerId);
+            showToast('🔗 新设备已连接');
+          };
+
+          dc.onclose = () => {
+            connectedPeers.value = peerConnections.size;
+            const peer = discoveredPeers.value.find(p => p.id === peerId);
+            if (peer) peer.online = false;
+          };
+
+          dc.onmessage = async (e) => {
+            const data = JSON.parse(e.data);
+            await handleDataMessage(data, peerId);
+          };
+
+          signalingDataChannels.set(peerId, dc);
+        }
+
+        async function handleOffer(data) {
+          const pc = await createPeerConnection(data.peerId, false);
+
+          await pc.setRemoteDescription(data.offer);
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+
+          const bc = new BroadcastChannel('earphone-bom-sync');
+          bc.postMessage({ type: 'answer', target: data.peerId, answer });
+        }
+
+        async function handleAnswer(data) {
+          const pc = peerConnections.get(data.target);
+          if (pc) {
+            await pc.setRemoteDescription(data.answer);
+          }
+        }
+
+        async function handleIceCandidate(data) {
+          const pc = peerConnections.get(data.target);
+          if (pc && data.candidate) {
+            await pc.addIceCandidate(data.candidate);
+          }
+        }
+
+        async function handleDataMessage(data, fromPeerId) {
+          if (data.type === 'update') {
+            if (data.store === STORE_BOM) {
+              const idx = bomItems.value.findIndex(i => i.id === data.item.id);
+              if (idx !== -1) {
+                bomItems.value[idx] = { ...data.item };
+              }
+              await dbPut(data.store, data.item);
+            } else if (data.store === STORE_TOOLS) {
+              const idx = toolItems.value.findIndex(i => i.id === data.item.id);
+              if (idx !== -1) {
+                toolItems.value[idx] = { ...data.item };
+              }
+              await dbPut(data.store, data.item);
+            }
+          }
+        }
+
+        async function sendFullSync(targetPeerId) {
+          const dc = signalingDataChannels.get(targetPeerId);
+          if (dc && dc.readyState === 'open') {
+            dc.send(JSON.stringify({
+              type: 'sync-response',
+              bom: bomItems.value,
+              tools: toolItems.value
+            }));
+          }
+        }
+
+        async function handleSyncResponse(data) {
+          if (data.bom && Array.isArray(data.bom)) {
+            for (const item of data.bom) {
+              await dbPut(STORE_BOM, item);
+              const idx = bomItems.value.findIndex(i => i.id === item.id);
+              if (idx !== -1) {
+                bomItems.value[idx] = item;
+              } else {
+                bomItems.value.push(item);
+              }
+            }
+          }
+          if (data.tools && Array.isArray(data.tools)) {
+            for (const item of data.tools) {
+              await dbPut(STORE_TOOLS, item);
+              const idx = toolItems.value.findIndex(i => i.id === item.id);
+              if (idx !== -1) {
+                toolItems.value[idx] = item;
+              } else {
+                toolItems.value.push(item);
+              }
+            }
+          }
+          bomItems.value = bomItems.value.sort((a, b) => a.seq - b.seq);
+          toolItems.value = toolItems.value.sort((a, b) => a.seq - b.seq);
+        }
+
+        function connectToPeer(peer) {
+          if (peer.id === localPeerId) return;
+          createPeerConnection(peer.id, true);
+        }
+
+        onMounted(async () => {
+          await openDB();
+          await loadInitialData();
+          initWebRTC();
+        });
+
+        return {
+          bomItems,
+          toolItems,
+          activeTab,
+          searchQuery,
+          sortKey,
+          sortOrder,
+          toast,
+          showSyncModal,
+          deviceId,
+          discoveredPeers,
+          peerConnected,
+          connectedPeers,
+          filteredBOM,
+          filteredTools,
+          pendingCount,
+          completedCount,
+          progressPercent,
+          highlightText,
+          handleSearch,
+          sortBy,
+          sortByTool,
+          sortIcon,
+          incrementQty,
+          decrementQty,
+          toggleComplete,
+          toggleCompleteTool,
+          exportCSV,
+          copySellerLinks,
+          resetData,
+          connectToPeer
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
